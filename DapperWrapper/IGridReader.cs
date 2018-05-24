@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DapperWrapper
 {
-    public interface IGridReader
+    public interface IGridReader : IDisposable 
     {
         IList<object> Read(bool buffered = true);
 
@@ -19,7 +19,5 @@ namespace DapperWrapper
         IList<TReturn> Read<TFirst, TSecond, TThird, TReturn>(Func<TFirst, TSecond, TThird, TReturn> func, string splitOn = "id");
 
         IList<TReturn> Read<TFirst, TSecond, TThird, TFourth, TReturn>(Func<TFirst, TSecond, TThird, TFourth, TReturn> func, string splitOn = "id");
-
-        void Dispose();
     }
 }

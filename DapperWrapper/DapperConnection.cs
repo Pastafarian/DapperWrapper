@@ -27,69 +27,95 @@ namespace DapperWrapper
             }
         }
 
-        public int Execute(string sql, object param = null, CommandType? commandType = default(CommandType?))
+        public ConnectionState State => connection.State;
+
+        public int Execute(string sql, object param = null, IDbTransaction transaction = null, int? timeout = default(int?), CommandType? commandType = default(CommandType?))
         {
-            return Run(() => connection.Execute(sql, param, null, default(int?), commandType), sql, param);
+            return Run(() => connection.Execute(sql, param, transaction, timeout, commandType), sql, param);
         }
 
-        public Task<int> ExecuteAsync(string sql, object param = null, CommandType? commandType = default(CommandType?))
+        public Task<int> ExecuteAsync(string sql, object param = null, IDbTransaction transaction = null, int? timeout = default(int?), CommandType? commandType = default(CommandType?))
         {
-            return Run(()=> connection.ExecuteAsync(sql, param, null, default(int?), commandType), sql, param);
+            return Run(()=> connection.ExecuteAsync(sql, param, transaction, timeout, commandType), sql, param);
         }
 
-        public IEnumerable<dynamic> Query(string sql, object param = null, CommandType? commandType = default(CommandType?), int? commandTimeout = null)
+        public IEnumerable<T> Query<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffered = true,
+            int? commandTimeout = null, CommandType? commandType = null)
         {
-            return Run(() => connection.Query(sql, param, null, true, commandTimeout, commandType), sql, param);
+            return Run(() => connection.Query<T>(sql, param, transaction, buffered, commandTimeout, commandType), sql, param);
         }
 
-        public Task<IEnumerable<dynamic>> QueryAsync(string sql, object param = null, CommandType? commandType = default(CommandType?), int? commandTimeout = null)
+        public Task<IEnumerable<T>> QueryAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType? commandType = null)
         {
-            return Run(() => connection.QueryAsync(sql, param, null, commandTimeout, commandType), sql, param);
+            return Run(() => connection.QueryAsync<T>(sql, param, transaction, commandTimeout, commandType), sql, param);
         }
 
-        public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, object param, CommandType? commandType, Func<TFirst, TSecond, TThird, TFourth, TReturn> func, string splitOn = "id")
+        public IEnumerable<dynamic> Query(string sql, object param = null, IDbTransaction transaction = null, bool buffered = true,
+            int? commandTimeout = null, CommandType? commandType = null)
         {
-            return Run(() => connection.Query(sql, func, param, splitOn: "id", commandType: commandType), sql, param);
+            return Run(() => connection.Query(sql, param, transaction, buffered, commandTimeout, commandType), sql, param);
         }
 
-        public Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, object param, CommandType? commandType, Func<TFirst, TSecond, TThird, TFourth, TReturn> func, string splitOn = "id")
+        public Task<IEnumerable<dynamic>> QueryAsync(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType? commandType = null)
         {
-            return Run(() => connection.QueryAsync(sql, func, param, splitOn: "id", commandType: commandType), sql, param);
+            return Run(() => connection.QueryAsync(sql, param, transaction, commandTimeout, commandType), sql, param);
         }
 
-        public IEnumerable<T> Query<T>(string sql, object param = null, CommandType? commandType = default(CommandType?), int? commandTimeout = null)
+        public IEnumerable<TReturn> Query<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object param = null,
+            IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null,
+            CommandType? commandType = null)
         {
-            return Run(() => connection.Query<T>(sql, param, null, true, commandTimeout, commandType), sql, param);
+            return Run(() => connection.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType), sql, param);
         }
 
-        public Task<IEnumerable<T>> QueryAsync<T>(string sql, object param = null, CommandType? commandType = default(CommandType?), int? commandTimeout = null)
+        public Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object param = null,
+            IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null,
+            CommandType? commandType = null)
         {
-            return Run(() => connection.QueryAsync<T>(sql, param, null, commandTimeout, commandType), sql, param);
+            return Run(() => connection.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType), sql, param);
         }
 
-        public Task<T> QuerySingleAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public T QuerySingle<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
+            return Run(() => connection.QuerySingle<T>(sql, param, transaction, commandTimeout, commandType), sql, param);
+        }
+
+        public Task<T> QuerySingleAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType? commandType = null)
         {
             return Run(() => connection.QuerySingleAsync<T>(sql, param, transaction, commandTimeout, commandType), sql, param);
         }
 
-        public Task<T> QueryFirstAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public Task<T> QueryFirstAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType? commandType = null)
         {
             return Run(() => connection.QueryFirstAsync<T>(sql, param, transaction, commandTimeout, commandType), sql, param);
         }
 
-        public Task<T> QueryFirstOrDefaultAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public Task<dynamic> QueryFirstOrDefaultAsync(string sql, object param = null, IDbTransaction transaction = null,
+            int? commandTimeout = null, CommandType? commandType = null)
+        {
+            return Run(() => connection.QueryFirstOrDefaultAsync(sql, param, transaction, commandTimeout, commandType), sql, param);
+        }
+
+        public Task<T> QueryFirstOrDefaultAsync<T>(string sql, object param = null, IDbTransaction transaction = null,
+            int? commandTimeout = null, CommandType? commandType = null)
         {
             return Run(() => connection.QueryFirstOrDefaultAsync<T>(sql, param, transaction, commandTimeout, commandType), sql, param);
         }
 
-        public IGridReader QueryMultiple(string sql, object param = null, CommandType? commandType = default(CommandType?))
+        public IGridReader QueryMultiple(string sql, object param = null, IDbTransaction transaction = null,
+            int? commandTimeout = null, CommandType? commandType = null)
         {
-            return Run(() => new GridReader(connection.QueryMultiple(sql, param, null, default(int), commandType)), sql, param);
+            return Run(() => new GridReader(connection.QueryMultiple(sql, param, transaction, commandTimeout, commandType)), sql, param);
         }
 
-        public Task<IGridReader> QueryMultipleAsync(string sql, object param = null, CommandType? commandType = default(CommandType?))
+        public Task<IGridReader> QueryMultipleAsync(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType? commandType = null)
         {
-            return GeneralizeTask<IGridReader, GridReader>(Run(async () => new GridReader(await connection.QueryMultipleAsync(sql, param, null, default(int), commandType)), sql, param));
+            return GeneralizeTask<IGridReader, GridReader>(Run(async () => new GridReader(await connection.QueryMultipleAsync(sql, param, transaction, commandTimeout, commandType)), sql, param));
         }
 
         public void EnlistTransaction(Transaction transation)
