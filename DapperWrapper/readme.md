@@ -1,0 +1,1 @@
+﻿https://sergeyakopov.com/reliable-database-connections-and-commands-with-polly/

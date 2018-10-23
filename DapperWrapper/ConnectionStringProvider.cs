@@ -1,6 +1,6 @@
 ﻿namespace DapperWrapper
 {
-    public class ConnectionStringProvider : IConnectionStringProvider
+    public class ConnectionStringProvider 
     {
         public string ConnectionString { get; set; }
     }

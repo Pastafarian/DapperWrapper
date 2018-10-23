@@ -1,17 +1,19 @@
-﻿namespace DapperWrapper
+﻿using System.Data.SqlClient;
+
+namespace DapperWrapper
 {
     public class DapperConnectionFactory : IDapperConnectionFactory
     {
-        private readonly IConnectionStringProvider connectionStringProvider;
+        private readonly ConnectionStringProvider connectionStringProvider;
 
-        public DapperConnectionFactory(IConnectionStringProvider connectionStringProvider)
+        public DapperConnectionFactory(ConnectionStringProvider connectionStringProvider)
         {
             this.connectionStringProvider = connectionStringProvider;
         }
 
         public IDapperConnection CreateConnection()
         {
-            var connection = new DapperConnection(connectionStringProvider.ConnectionString);
+            var connection = new DapperConnection(new SqlConnection(connectionStringProvider.ConnectionString));
             connection.Open();
             return connection;
         }
