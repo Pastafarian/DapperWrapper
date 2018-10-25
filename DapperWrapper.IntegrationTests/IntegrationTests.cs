@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Text;
 using DapperWrapper.Polly;
 using Xunit;
 
@@ -19,7 +17,7 @@ namespace DapperWrapper.IntegrationTests
 
         public IntegrationTests()
         {
-            con = new ResilientDapperConnection(new SqlConnection(sqlConnection), new DefaultSqlRetryPolicy(new MockLogger()));
+            con = new ResilientDapperConnection(new SqlConnection(sqlConnection), new SlidingSqlRetryPolicy(new MockLogger(), new RetryOptions()));
         }
 
         [Fact]

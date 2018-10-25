@@ -7,16 +7,6 @@ using Polly;
 
 namespace DapperWrapper.Polly
 {
-    public class RetryOptions
-    {
-        public int RetryCount { get; set; }
-
-        public RetryOptions()
-        {
-            RetryCount = 6;
-        }
-    }
-
     // Retry a specified number of times, using a function to 
     // calculate the duration to wait between retries based on 
     // the current retry attempt (allows for exponential back-off)

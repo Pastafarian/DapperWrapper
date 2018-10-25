@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DapperWrapper
+namespace DapperWrapper.Polly
 {
     public interface IRetryPolicy
     {

@@ -6,13 +6,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DapperWrapper.Polly;
+using Logging.Serilog;
 using Microsoft.Extensions.Configuration;
-using Serilog;
 using SimpleInjector;
 using SimpleInjector.Advanced;
 using SimpleInjector.Lifestyles;
-using Tpr.Logging;
-using TPR.Logging.Serilog;
 using ILogger = DapperWrapper.Polly.ILogger;
 
 namespace Run
@@ -53,8 +51,8 @@ namespace Run
 
             container.Register(() => loggerSettings, Lifestyle.Singleton);
             container.RegisterConditional(
-                typeof(ITprLogger),
-                c => typeof(TprLogger<>).MakeGenericType(typeof(Runner)),
+                typeof(Logging.Serilog.ILogger),
+                c => typeof(Logger<>).MakeGenericType(typeof(Runner)),
                 Lifestyle.Singleton,
                 c => true);
 
@@ -62,7 +60,7 @@ namespace Run
 
             var runner = new Runner();
 
-            var tprLogger = container.GetInstance<ITprLogger>();
+            var tprLogger = container.GetInstance<Logging.Serilog.ILogger>();
             runner.Run(tprLogger);
 
             Console.WriteLine("Finished program");
@@ -74,15 +72,15 @@ namespace Run
     {
         private const string SqlConnection = "Server=IT02090\\SQL2017;Integrated Security=True;Database=DapperWrapperTests";
 
-        private ITprLogger tprLogger;
+        private Logging.Serilog.ILogger logger;
         private static ResilientDapperConnection con;
 
 
-        public async void Run(ITprLogger logger)
+        public async void Run(Logging.Serilog.ILogger logger)
         {
-            tprLogger = logger;
+            this.logger = logger;
 
-            con = new ResilientDapperConnection(new SqlConnection(SqlConnection), new DefaultSqlRetryPolicy(new RetryLogger(tprLogger)));
+            con = new ResilientDapperConnection(new SqlConnection(SqlConnection), new SlidingSqlRetryPolicy(new RetryLogger(this.logger), new RetryOptions()));
 
             await RunTests();
         }
@@ -106,7 +104,7 @@ namespace Run
             }
             catch (Exception e)
             {
-                tprLogger.Error(e, string.Empty);
+                logger.Error(e, string.Empty);
                 Console.WriteLine(e.Message);
                 return -1;
             }
@@ -120,7 +118,7 @@ namespace Run
             }
             catch (Exception e)
             {
-                tprLogger.Error(e, string.Empty);
+                logger.Error(e, string.Empty);
                 Console.WriteLine(e.Message);
                 return default(T);
             }
@@ -131,16 +129,16 @@ namespace Run
 
     public class RetryLogger : ILogger
     {
-        private readonly ITprLogger tprLogger;
+        private readonly Logging.Serilog.ILogger logger;
 
-        public RetryLogger(ITprLogger tprLogger)
+        public RetryLogger(Logging.Serilog.ILogger logger)
         {
-            this.tprLogger = tprLogger;
+            this.logger = logger;
         }
 
         public void Error(Exception exception, string messageTemplate)
         {
-            tprLogger.Error(exception, messageTemplate);
+            logger.Error(exception, messageTemplate);
             Console.WriteLine(exception.Message + " " + messageTemplate);
         }
     }
